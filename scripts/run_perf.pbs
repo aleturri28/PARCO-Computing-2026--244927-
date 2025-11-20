@@ -1,0 +1,61 @@
+#!/bin/bash
+#PBS -N perf_spmv
+#PBS -q short_cpuQ
+#PBS -l select=1:ncpus=64:mem=32gb
+#PBS -l walltime=06:00:00
+#PBS -j oe
+#PBS -o perf_job.log
+
+cd "$PBS_O_WORKDIR/.."
+
+REPO_DIR="$(pwd)"
+MATRIX="$REPO_DIR/matrix/${MATRIX_NAME}/${MATRIX_NAME}.mtx"
+
+if [ ! -f "$MATRIX" ]; then
+    exit 1
+fi
+
+module load perf
+
+RESULTS_DIR="$REPO_DIR/results"
+mkdir -p "$RESULTS_DIR"
+
+OUTPUT="$RESULTS_DIR/perf_${MATRIX_NAME}.csv"
+
+if [ ! -f "$OUTPUT" ]; then
+    echo "schedule,chunk,threads,L1_loads,L1_misses,LLC_loads,LLC_misses" > "$OUTPUT"
+fi
+
+SCHEDULES=("static" "dynamic" "guided")
+CHUNKS=(10 100 1000)
+THREADS=(2 4 8 16 32 64)
+
+for S in "${SCHEDULES[@]}"; do
+  for C in "${CHUNKS[@]}"; do
+    for T in "${THREADS[@]}"; do
+
+      PERFRAW=$(mktemp)
+
+      perf stat \
+        -x ',' \
+        -e L1-dcache-loads,L1-dcache-load-misses,LLC-loads,LLC-load-misses \
+        ./spmv "$MATRIX" "$S" "$C" "$T" \
+        1>/dev/null 2>"$PERFRAW"
+
+      L1_LOADS=$(grep "L1-dcache-loads"        "$PERFRAW" | awk -F',' '{print $1}')
+      L1_MISSES=$(grep "L1-dcache-load-misses" "$PERFRAW" | awk -F',' '{print $1}')
+      LLC_LOADS=$(grep ",LLC-loads"            "$PERFRAW" | awk -F',' '{print $1}')
+      LLC_MISSES=$(grep ",LLC-load-misses"     "$PERFRAW" | awk -F',' '{print $1}')
+
+      L1_LOADS=${L1_LOADS:-0}
+      L1_MISSES=${L1_MISSES:-0}
+      LLC_LOADS=${LLC_LOADS:-0}
+      LLC_MISSES=${LLC_MISSES:-0}
+
+      echo "$S,$C,$T,$L1_LOADS,$L1_MISSES,$LLC_LOADS,$LLC_MISSES" >> "$OUTPUT"
+
+      rm "$PERFRAW"
+    done
+  done
+done
+

@@ -1,0 +1,28 @@
+#!/bin/bash
+#PBS -N cachegrind_seq
+#PBS -q short_cpuQ
+#PBS -o cachegrind_seq.out
+#PBS -e cachegrind_seq.err
+#PBS -l select=1:ncpus=1:mem=8gb
+#PBS -l walltime=06:00:00
+
+cd "$PBS_O_WORKDIR/.."
+
+REPO_DIR="$(pwd)"
+MATRIX_PATH="$REPO_DIR/matrix/${MATRIX_NAME}/${MATRIX_NAME}.mtx"
+
+if [ ! -f "$MATRIX_PATH" ]; then
+    exit 1
+fi
+
+RESULTS_DIR="$REPO_DIR/results"
+mkdir -p "$RESULTS_DIR"
+
+VALGRIND_OUTPUT="$RESULTS_DIR/cachegrind_full_${MATRIX_NAME}.txt"
+CG_OUTFILE="$RESULTS_DIR/cachegrind.out.${MATRIX_NAME}"
+
+valgrind --tool=cachegrind \
+    --cachegrind-out-file="$CG_OUTFILE" \
+    ./spmv_seq "$MATRIX_PATH" \
+    &> "$VALGRIND_OUTPUT"
+

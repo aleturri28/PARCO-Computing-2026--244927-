@@ -1,0 +1,36 @@
+#!/bin/bash
+#PBS -N csrpar_benchmark
+#PBS -q short_cpuQ
+#PBS -o csrpar.out
+#PBS -e csrpar.err
+#PBS -l select=1:ncpus=64:mem=32gb
+#PBS -l walltime=06:00:00
+
+cd "$PBS_O_WORKDIR/.."
+
+REPO_DIR="$(pwd)"
+MATRIX_PATH="$REPO_DIR/matrix/${MATRIX_NAME}/${MATRIX_NAME}.mtx"
+
+if [ ! -f "$MATRIX_PATH" ]; then
+    exit 1
+fi
+
+RESULTS_DIR="$REPO_DIR/results"
+mkdir -p "$RESULTS_DIR"
+
+OUT_CSV="$RESULTS_DIR/results_${MATRIX_NAME}.csv"
+echo "matrix,schedule,chunk,threads,run1,run2,run3,run4,run5,run6,run7,run8,run9,run10" > "$OUT_CSV"
+
+SCHEDULES=("static" "dynamic" "guided")
+CHUNKS=(10 100 1000)
+THREADS=(2 4 8 16 32 64)
+
+for sched in "${SCHEDULES[@]}"; do
+  for chunk in "${CHUNKS[@]}"; do
+    for th in "${THREADS[@]}"; do
+      LINE=$(./spmv "$MATRIX_PATH" "$sched" "$chunk" "$th")
+      echo "$LINE" >> "$OUT_CSV"
+    done
+  done
+done
+
