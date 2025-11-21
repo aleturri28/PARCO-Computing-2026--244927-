@@ -232,28 +232,35 @@ for url in \
   "https://sparse.tamu.edu/MM/DNVS/x104.tar.gz" \
   "https://sparse.tamu.edu/MM/vanHeukelum/cage14.tar.gz" \
   "https://sparse.tamu.edu/MM/Mittelmann/cont1_l.tar.gz" \
-.do
+; do
   fname=$(basename "$url")
-  tarname="${fname%.gz}"  # from .tar.gz to .tar
+  tarname="${fname%.gz}"    # convert .tar.gz → .tar
+  dirname="${tarname%.tar}" # extract folder name
 
   echo "Downloading $fname ..."
-  wget "$url"
+  curl -L "$url" -o "$fname"
 
   echo "Extracting $fname ..."
   gzip -d "$fname"
   tar -xf "$tarname"
 
-  echo "Cleaning archive..."
+  echo "Organizing matrix folder ..."
+  mkdir -p "$dirname"
+  mv "$dirname"/*.mtx "$dirname" 2>/dev/null || true
+
+  echo "Removing archive $tarname ..."
   rm "$tarname"
+
+  echo "=== Done $dirname ==="
 done
 
 cd ..
 
 echo "=== 3) Compile sequential code ==="
-g++ -std=c++11 -O3 src/csrseq.cpp -o spmv_seq
+g++ -std=c++11 src/csrseq.cpp -o spmv_seq
 
 echo "=== 4) Compile parallel code (OpenMP) ==="
-g++ -std=c++11 -O3 -fopenmp src/csrpar.cpp -o spmv
+g++ -std=c++11 -fopenmp src/csrpar.cpp -o spmv
 
 echo "=== 5) Submitting PBS jobs (only on HPC UniTN) ==="
 
