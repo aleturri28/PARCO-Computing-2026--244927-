@@ -88,24 +88,6 @@ repo/
 ├── spmv_seq                  # Sequential executable (compiled manually)
 └── .git/                     # Git metadata
 ```
-
-PARCO-Computing-2026-242330/
-├── README.md
-├── src/
-│   ├── csrseq.cpp           # Sequential CSR implementation
-│   └── csrpar.cpp           # Parallel CSR implementation (OpenMP)
-│
-├── scripts/
-│   ├── run_seq.pbs          # Sequential PBS job
-│   ├── run_csrpar.pbs       # Parallel PBS job
-│   ├── run_perf.pbs         # Perf profiling
-│   └── run_cachegrind_seq.pbs  # Cachegrind profiling
-│
-├── matrix/                  # Matrices directory
-├── results/                 # Benchmark outputs
-├── plots/                   # Generated figures
-└── ...
-
 ````
 
 ---
