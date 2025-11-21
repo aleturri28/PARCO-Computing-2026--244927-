@@ -14,7 +14,7 @@ The goals of the project are:
 
 * Compare **sequential** vs **parallel** SpMV
 * Evaluate **thread scaling** from 2 to 64 threads
-* Compare **OpenMP scheduling**: `static`, `dynamic`, `guided`, `auto`
+* Compare **OpenMP scheduling**: `static`, `dynamic`, `guided`
 * Analyse the effect of **chunk sizes**: 10, 100, 1000
 * Measure **performance counters** (with `perf`)
 * Analyse **cache behaviour** (with Valgrind Cachegrind)
@@ -86,8 +86,6 @@ repo/
 ├── spmv_seq                  # Sequential executable (compiled manually)
 └── .git/                     # Git metadata
 ```
-````
-
 ---
 
 # 4. Compilation
@@ -96,13 +94,13 @@ Compilation is done **manually** outside PBS scripts.
 
 ### Sequential Version
 
-```bash
+```
 g++ -std=c++11 -o spmv_seq src/csrseq.cpp
 ````
 
 ### Parallel Version (OpenMP)
 
-```bash
+```
 g++ -std=c++11 -fopenmp -o spmv src/csrpar.cpp
 ```
 
@@ -110,7 +108,7 @@ g++ -std=c++11 -fopenmp -o spmv src/csrpar.cpp
 
 # 5. Running on the HPC Cluster (UniTN)
 
-All experiments were executed on **public queue ****************************************************************************`short_cpuQ`**:
+All experiments were executed on **public queue ** **`short_cpuQ`**:
 
 * Walltime limit: **6 hours**
 * Up to **64 threads** available
@@ -118,7 +116,7 @@ All experiments were executed on **public queue ********************************
 
 Execution via PBS scripts:
 
-```bash
+```
 qsub -v MATRIX_NAME=<matrix_name> run_seq.pbs
 qsub -v MATRIX_NAME=<matrix_name> run_csrpar.pbs
 qsub -v MATRIX_NAME=<matrix_name> run_perf.pbs
@@ -127,7 +125,7 @@ qsub -v MATRIX_NAME=<matrix_name> run_cachegrind_seq.pbs
 
 Example:
 
-```bash
+```
 qsub -v MATRIX_NAME=heart2 run_csrpar.pbs
 ```
 
@@ -149,7 +147,7 @@ Parameters tested:
 Instrumentation:
 
 * `perf stat` → instructions, cycles, IPC, cache misses, branches
-* Valgrind Cachegrind → detailed L1/L2/LLC behavior
+* `Valgrind Cachegrind` → detailed L1/L2/LLC behavior
 
 ---
 
@@ -157,13 +155,13 @@ Instrumentation:
 
 ### Sequential
 
-```bash
+```
 ./spmv_seq matrix/heart2/heart2.mtx
 ```
 
 ### Parallel
 
-```bash
+```
 export OMP_NUM_THREADS=8
 export OMP_SCHEDULE="static,10"
 ./spmv matrix/heart2/heart2.mtx
@@ -171,7 +169,7 @@ export OMP_SCHEDULE="static,10"
 
 ### Run all matrices
 
-```bash
+```
 for m in matrix/*/*.mtx; do ./spmv_seq "$m"; done
 ```
 
@@ -218,7 +216,7 @@ plots/
 
 The following script automates cloning the repository, downloading all matrices used in this project, compiling both sequential and parallel versions, and (if running on the UniTN HPC cluster) submitting PBS jobs automatically.
 
-```bash
+```
 echo "=== 1) Clone repository ==="
 git clone https://github.com/aleturri28/PARCO-Computing-2026-244927-.git PARCO-Computing-2026-244927- || exit 1
 
@@ -284,7 +282,7 @@ echo "=== SETUP COMPLETE ==="
 
 # 11. Additional Reproducibility Notest automates cloning the repository, downloading all matrices used in this project, compiling both sequential and parallel versions, and (if running on the UniTN HPC cluster) submitting PBS jobs automatically.
 
-```bash
+```
 echo "=== 1) Clone repository ==="
 git clone https://github.com/aleturri28/PARCO-Computing-2026-244927-.git
 cd repo || exit 1
