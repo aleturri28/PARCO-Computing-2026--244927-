@@ -50,8 +50,6 @@ The following SuiteSparse matrices are used for benchmarking:
 | **cont1_l**  | 7,031,999  | 1,918,399 | 1,921,596 | Contact mechanics        |
 | **cage14**   | 27,130,349 | 1,505,785 | 1,505,785 | Very large sparse matrix |
 
-*(All nnz/rows/cols extracted from SuiteSparse.)* and dimensions will be added after parsing matrices.)*
-
 Place all matrices in:
 
 ```
