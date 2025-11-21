@@ -234,11 +234,11 @@ for url in \
   "https://sparse.tamu.edu/MM/Mittelmann/cont1_l.tar.gz" \
 ; do
   fname=$(basename "$url")
-  tarname="${fname%.gz}"    # convert .tar.gz → .tar
-  dirname="${tarname%.tar}" # extract folder name
+  tarname="${fname%.gz}"    # .tar.gz → .tar
+  dirname="${tarname%.tar}" # folder name
 
   echo "Downloading $fname ..."
-  curl -L "$url" -o "$fname"
+  wget "$url"
 
   echo "Extracting $fname ..."
   gzip -d "$fname"
@@ -246,9 +246,9 @@ for url in \
 
   echo "Organizing matrix folder ..."
   mkdir -p "$dirname"
-  mv "$dirname"/*.mtx "$dirname" 2>/dev/null || true
+  find "$dirname" -name "*.mtx" -exec mv {} "$dirname" \;
 
-  echo "Removing archive $tarname ..."
+  echo "Cleaning archive ..."
   rm "$tarname"
 
   echo "=== Done $dirname ==="
@@ -257,20 +257,25 @@ done
 cd ..
 
 echo "=== 3) Compile sequential code ==="
-g++ -std=c++11 src/csrseq.cpp -o spmv_seq
+g++ -std=c++11 -O3 src/csrseq.cpp -o spmv_seq
 
 echo "=== 4) Compile parallel code (OpenMP) ==="
-g++ -std=c++11 -fopenmp src/csrpar.cpp -o spmv
+g++ -std=c++11 -O3 -fopenmp src/csrpar.cpp -o spmv
 
 echo "=== 5) Submitting PBS jobs (only on HPC UniTN) ==="
 
-if [[ "$HOSTNAME" == *"hpc"* ]]; then
-    echo "Detected HPC environment — submitting jobs..."
+matrices=(heart2 olm2000 bcsstk17 msc10848 hcircuit x104 cage14 cont1_l)
 
-    qsub -v MATRIX_NAME=heart2 scripts/run_seq.pbs
-    qsub -v MATRIX_NAME=heart2 scripts/run_csrpar.pbs
-    qsub -v MATRIX_NAME=heart2 scripts/run_perf.pbs
-    qsub -v MATRIX_NAME=heart2 scripts/run_cachegrind_seq.pbs
+if [[ "$HOSTNAME" == *"hpc"* ]]; then
+    echo "Detected HPC environment — submitting jobs for ALL matrices..."
+
+    for M in "${matrices[@]}"; do
+        echo "Submitting jobs for $M ..."
+        qsub -v MATRIX_NAME=$M scripts/run_seq.pbs
+        qsub -v MATRIX_NAME=$M scripts/run_csrpar.pbs
+        qsub -v MATRIX_NAME=$M scripts/run_perf.pbs
+        qsub -v MATRIX_NAME=$M scripts/run_cachegrind_seq.pbs
+    done
 
     echo "All jobs submitted!"
 else
