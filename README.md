@@ -216,11 +216,12 @@ plots/
 The script below automates cloning the repository, downloading all matrices used in this project, compiling both sequential and parallel versions, and (if running on the UniTN HPC cluster) submitting PBS jobs automatically.
 
 ```bash
-echo "=== 1) Clone repository ==="
+### === 1) Clone repository ===
 git clone https://github.com/aleturri28/PARCO-Computing-2026--244927-.git repo
 cd repo || exit 1
 
-echo "=== 2) Download SuiteSparse matrices ==="
+
+### === 2) Download SuiteSparse matrices ===
 cd matrix
 
 for url in \
@@ -233,64 +234,67 @@ for url in \
   "https://sparse.tamu.edu/MM/vanHeukelum/cage14.tar.gz" \
   "https://sparse.tamu.edu/MM/Mittelmann/cont1_l.tar.gz" \
 ; do
-  fname=$(basename "$url")
-  tarname="${fname%.gz}"    # .tar.gz → .tar
-  dirname="${tarname%.tar}" # folder name
+    fname=$(basename "$url")
+    tarname="${fname%.gz}"
+    dirname="${tarname%.tar}"
 
-  echo "Downloading $fname ..."
-  wget "$url"
+    echo "Downloading $fname ..."
+    wget "$url"
 
-  echo "Extracting $fname ..."
-  gzip -d "$fname"
-  tar -xf "$tarname"
+    echo "Extracting ..."
+    gzip -d "$fname"
+    tar -xf "$tarname"
 
-  echo "Organizing matrix folder ..."
-  mkdir -p "$dirname"
-  find "$dirname" -name "*.mtx" -exec mv {} "$dirname" \;
+    echo "Organizing matrix folder $dirname ..."
+    mkdir -p "$dirname"
+    find "$dirname" -name "*.mtx" -exec mv {} "$dirname" \;
 
-  echo "Cleaning archive ..."
-  rm "$tarname"
-
-  echo "=== Done $dirname ==="
+    rm "$tarname"
+    echo "=== Done $dirname ==="
 done
 
 cd ..
 
-echo "=== 3) Compile sequential code ==="
+
+### === 3) Compile sequential code ===
 g++ -std=c++11 -O3 src/csrseq.cpp -o spmv_seq
 
-echo "=== 4) Compile parallel code (OpenMP) ==="
+
+### === 4) Compile parallel OpenMP code ===
 g++ -std=c++11 -O3 -fopenmp src/csrpar.cpp -o spmv
 
-echo "=== 5) Submitting PBS jobs (only on HPC UniTN) ==="
+
+### === 5) Submit PBS jobs with job-limit protection ===
+cd scripts
 
 matrices=(heart2 olm2000 bcsstk17 msc10848 hcircuit x104 cage14 cont1_l)
 
-if [[ "$HOSTNAME" == *"hpc"* ]]; then
-    echo "Detected HPC environment — submitting jobs for ALL matrices..."
+submit_and_wait() {
+    M=$1
+    echo "Submitting 4 jobs for $M ..."
 
-    for M in "${matrices[@]}"; do
-        echo "Submitting jobs for $M ..."
-        qsub -v MATRIX_NAME=$M scripts/run_seq.pbs
-        qsub -v MATRIX_NAME=$M scripts/run_csrpar.pbs
-        qsub -v MATRIX_NAME=$M scripts/run_perf.pbs
-        qsub -v MATRIX_NAME=$M scripts/run_cachegrind_seq.pbs
+    qsub -v MATRIX_NAME=$M run_seq.pbs
+    qsub -v MATRIX_NAME=$M run_csrpar.pbs
+    qsub -v MATRIX_NAME=$M run_perf.pbs
+    qsub -v MATRIX_NAME=$M run_cachegrind_seq.pbs
+
+    echo "Waiting until job count < 28 ..."
+    while true; do
+        NJOBS=$(qstat -u "$USER" | grep -c "$USER")
+        if [ "$NJOBS" -lt 28 ]; then
+            break
+        fi
+        sleep 5
     done
+}
 
-    echo "All jobs submitted!"
-else
-    echo "You are NOT on the HPC cluster. Run these manually after ssh:"
-    echo ""
-    echo "Sequential:"
-    echo "  qsub -v MATRIX_NAME=<matrix> scripts/run_seq.pbs"
-    echo "  qsub -v MATRIX_NAME=<matrix> scripts/run_cachegrind_seq.pbs"
-    echo ""
-    echo "Parallel:"
-    echo "  qsub -v MATRIX_NAME=<matrix> scripts/run_csrpar.pbs"
-    echo "  qsub -v MATRIX_NAME=<matrix> scripts/run_perf.pbs"
-fi
+echo "Detected HPC environment — submitting jobs sequentially with waiting..."
+for M in "${matrices[@]}"; do
+    submit_and_wait "$M"
+done
 
-echo "=== SETUP COMPLETE ==="
+echo "=== ALL JOBS SUBMITTED SAFELY ==="
+
 ```
 
 ---
