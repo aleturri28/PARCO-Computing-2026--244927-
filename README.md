@@ -299,19 +299,6 @@ echo "=== ALL JOBS SUBMITTED SAFELY ==="
 
 ---
 
-## 11. Additional Reproducibility Notes
-
-* All runs use a fixed seed (e.g., `srand(42)`) for reproducibility
-* Matrix files are expected in the form:
-
-```bash
-matrix/<name>/<name>.mtx
-```
-
-* Matrices larger than 100 MB are not stored in GitHub; the download procedure is described above
-
----
-
 ## Author
 
 **Alessandro Turri**
