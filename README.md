@@ -113,7 +113,7 @@ All experiments were executed on the public queue **`short_cpuQ`**:
 * Up to **64 threads** available
 * Suitable for repeated benchmarking runs
 
-Execution via PBS scripts (from inside `repo/scripts/`):
+Execution via PBS scripts (from inside `repo/`):
 
 ```bash
 qsub -v MATRIX_NAME=<matrix_name> scripts/run_seq.pbs
