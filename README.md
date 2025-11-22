@@ -217,7 +217,7 @@ The script below automates cloning the repository, downloading all matrices used
 
 ```bash
 echo "=== 1) Clone repository ==="
-git clone https://github.com/aleturri28/PARCO-Computing-2026-244927-.git repo
+git clone https://github.com/aleturri28/PARCO-Computing-2026--244927-.git repo
 cd repo || exit 1
 
 echo "=== 2) Download SuiteSparse matrices ==="
