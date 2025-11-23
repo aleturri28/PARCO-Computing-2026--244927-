@@ -160,11 +160,12 @@ Instrumentation:
 
 ### Parallel
 
+Usage: `./spmv <matrix_path> <schedule> <chunk> <threads>`
+
+Example running with 8 threads, static scheduling, and chunk size 10:
+
 ```bash
-export OMP_NUM_THREADS=8
-export OMP_SCHEDULE="static,10"
-./spmv matrix/heart2/heart2.mtx
-```
+./spmv matrix/heart2/heart2.mtx static 10 8
 
 ### Run all matrices sequentially
 
