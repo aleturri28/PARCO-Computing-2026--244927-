@@ -162,9 +162,6 @@ int main(int argc, char* argv[]) {
         times_ms[run] = elapsed.count();
     }
 
-    // CSV output (single line)
-    // I keep it similar to parallel but without schedule/chunk/threads:
-    //   matrix,run1,...,run10
     string matrix_name = extract_matrix_name(filename);
 
     cout << matrix_name;

@@ -228,8 +228,6 @@ int main(int argc, char* argv[]) {
         times_ms[run] = (end - start) * 1000.0; // milliseconds
     }
 
-    // --- CSV output (single line) ---
-    // Format (B1): matrix,schedule,chunk,threads,run1,...,run10
     string matrix_name = extract_matrix_name(filename);
 
     cout << matrix_name << "," << schedule_str << ","
