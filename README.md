@@ -113,13 +113,13 @@ All experiments were executed on the public queue **`short_cpuQ`**:
 * Up to **64 threads** available
 * Suitable for repeated benchmarking runs
 
-Execution via PBS scripts (from inside `repo/`):
+Execution via PBS scripts (from inside `repo/scripts/`):
 
 ```bash
-qsub -v MATRIX_NAME=<matrix_name> scripts/run_seq.pbs
-qsub -v MATRIX_NAME=<matrix_name> scripts/run_csrpar.pbs
-qsub -v MATRIX_NAME=<matrix_name> scripts/run_perf.pbs
-qsub -v MATRIX_NAME=<matrix_name> scripts/run_cachegrind_seq.pbs
+qsub -v MATRIX_NAME=<matrix_name> run_seq.pbs
+qsub -v MATRIX_NAME=<matrix_name> run_csrpar.pbs
+qsub -v MATRIX_NAME=<matrix_name> run_perf.pbs
+qsub -v MATRIX_NAME=<matrix_name> run_cachegrind_seq.pbs
 ```
 
 Example:
