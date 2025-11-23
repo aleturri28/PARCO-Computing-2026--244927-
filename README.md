@@ -166,18 +166,15 @@ Example running with 8 threads, static scheduling, and chunk size 10:
 
 ```bash
 ./spmv matrix/heart2/heart2.mtx static 10 8
-
+```
 ---
 
 ## 8. Results
 
 Collected results include:
 
-* Execution times (mean and 90th percentile)
-* Speedup and efficiency curves
-* Cache miss analysis
-* IPC and cycle counts
-* Scheduling policy comparison
+* Execution times
+* Cache miss
 
 Results are stored in:
 
