@@ -167,12 +167,6 @@ Example running with 8 threads, static scheduling, and chunk size 10:
 ```bash
 ./spmv matrix/heart2/heart2.mtx static 10 8
 
-### Run all matrices sequentially
-
-```bash
-for m in matrix/*/*.mtx; do ./spmv_seq "$m"; done
-```
-
 ---
 
 ## 8. Results
